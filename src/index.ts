@@ -20,8 +20,11 @@ app.use(
     origin: [
       "http://localhost:5173",
       "https://anime-tracker-adnansaif322.vercel.app",
+      "https://anime-tracker-frontend.vercel.app",
     ],
     credentials: true,
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
   })
 );
 
