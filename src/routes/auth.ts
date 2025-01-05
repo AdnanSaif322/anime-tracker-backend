@@ -1,5 +1,11 @@
 import { Hono } from "hono";
-import { register, login, getProfile } from "../controllers/auth";
+import {
+  register,
+  login,
+  getProfile,
+  logout,
+  refreshToken,
+} from "../controllers/auth";
 import { authMiddleware } from "../middleware/auth";
 import { supabaseService } from "../db/supabase";
 
@@ -26,5 +32,7 @@ auth.post("/register", async (c) => {
 });
 auth.post("/login", login);
 auth.get("/profile", authMiddleware, getProfile);
+auth.post("/logout", logout);
+auth.post("/refresh", refreshToken);
 
 export default auth;

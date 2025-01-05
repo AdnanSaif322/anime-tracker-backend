@@ -1,6 +1,13 @@
 import { Context } from "hono";
 import jwt from "jsonwebtoken";
 import { supabaseService, supabase } from "../db/supabase";
+import type { CustomContext } from "../types/context";
+import { getCookie, setCookie } from "hono/cookie";
+
+interface DecodedToken {
+  userId: string;
+  email: string;
+}
 
 export async function register(c: Context) {
   try {
@@ -46,10 +53,9 @@ export async function register(c: Context) {
   }
 }
 
-export async function login(c: Context) {
+export async function login(c: Context<CustomContext>) {
   try {
     const { email, password } = await c.req.json();
-    console.log("Login attempt for:", email);
 
     if (!email || !password) {
       return c.json({ error: "Email and password are required" }, 400);
@@ -61,35 +67,31 @@ export async function login(c: Context) {
       return c.json({ error: "Invalid credentials" }, 401);
     }
 
-    console.log("User data:", {
-      id: user.id,
-      email: user.email,
-      loginSource: c.req.header("User-Agent") || "unknown",
-    });
-
     const token = jwt.sign(
       {
         userId: user.id,
         email: user.email,
-        type: "access_token",
-        source: "login",
-        timestamp: Date.now(),
       },
       process.env.JWT_SECRET!,
-      {
-        expiresIn: "24h",
-        algorithm: "HS256",
-      }
+      { expiresIn: "24h" }
     );
 
-    console.log("Generated token details:", {
-      token: token.substring(0, 20) + "...",
-      decoded: jwt.decode(token),
+    setCookie(c, "auth_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24,
+      path: "/",
     });
 
-    return c.json({ token, user });
+    return c.json({
+      message: "Login successful",
+      user: {
+        email: user.email,
+        id: user.id,
+      },
+    });
   } catch (error) {
-    console.error("Login error:", error);
     return c.json({ error: "Authentication failed" }, 401);
   }
 }
@@ -107,5 +109,52 @@ export async function getProfile(c: Context) {
     return c.json(data);
   } catch (error) {
     return c.json({ error: "Failed to fetch profile" }, 400);
+  }
+}
+
+export async function logout(c: Context<CustomContext>) {
+  setCookie(c, "auth_token", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 0,
+    path: "/",
+  });
+  return c.json({ message: "Logged out successfully" });
+}
+
+export async function refreshToken(c: Context<CustomContext>) {
+  try {
+    const currentToken = getCookie(c, "auth_token");
+
+    if (!currentToken) {
+      return c.json({ error: "No token to refresh" }, 401);
+    }
+
+    const decoded = jwt.verify(
+      currentToken,
+      process.env.JWT_SECRET!
+    ) as DecodedToken;
+
+    const newToken = jwt.sign(
+      {
+        userId: decoded.userId,
+        email: decoded.email,
+      },
+      process.env.JWT_SECRET!,
+      { expiresIn: "24h" }
+    );
+
+    setCookie(c, "auth_token", newToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24,
+      path: "/",
+    });
+
+    return c.json({ message: "Token refreshed" });
+  } catch (error) {
+    return c.json({ error: "Failed to refresh token" }, 401);
   }
 }

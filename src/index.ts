@@ -1,19 +1,33 @@
 import { serve } from "@hono/node-server";
-import { Hono } from "hono";
+import { Hono, Context } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { config } from "dotenv";
 import auth from "./routes/auth";
 import anime from "./routes/anime";
 import { isAppError } from "./utils/errors";
+import { getCookie, setCookie } from "hono/cookie";
+import { CookieOptions } from "hono/utils/cookie";
 
 // Load environment variables
 config();
 
-const app = new Hono();
+type CustomContext = {
+  Variables: {
+    cookie: typeof setCookie;
+    getCookie: typeof getCookie;
+  };
+};
+
+const app = new Hono<CustomContext>();
 
 // Middleware
 app.use("*", logger());
+app.use("*", async (c: Context<CustomContext>, next) => {
+  c.set("cookie" as keyof CustomContext["Variables"], setCookie);
+  c.set("getCookie" as keyof CustomContext["Variables"], getCookie);
+  await next();
+});
 app.use(
   "*",
   cors({
