@@ -61,11 +61,19 @@ export async function login(c: Context) {
       return c.json({ error: "Invalid credentials" }, 401);
     }
 
+    console.log("User data:", {
+      id: user.id,
+      email: user.email,
+      loginSource: c.req.header("User-Agent") || "unknown",
+    });
+
     const token = jwt.sign(
       {
         userId: user.id,
         email: user.email,
         type: "access_token",
+        source: "login",
+        timestamp: Date.now(),
       },
       process.env.JWT_SECRET!,
       {
@@ -73,6 +81,11 @@ export async function login(c: Context) {
         algorithm: "HS256",
       }
     );
+
+    console.log("Generated token details:", {
+      token: token.substring(0, 20) + "...",
+      decoded: jwt.decode(token),
+    });
 
     return c.json({ token, user });
   } catch (error) {

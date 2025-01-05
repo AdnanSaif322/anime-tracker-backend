@@ -29,13 +29,27 @@ interface UserContext {
 anime.get("/list", async (c: Context<{ Variables: UserContext }>) => {
   try {
     const user = c.get("user");
-    console.log("Getting anime list for user:", user);
+    console.log("Getting anime list for user:", {
+      userId: user.userId,
+      email: user.email,
+      headers: {
+        origin: c.req.header("Origin"),
+        userAgent: c.req.header("User-Agent"),
+      },
+      token: c.req.header("Authorization")?.substring(0, 20) + "...",
+    });
 
     if (!user?.userId) {
       return c.json({ error: "User ID not found in token" }, 401);
     }
 
     const data = await supabaseService.getAnimeList(user.userId);
+    console.log("Anime list response:", {
+      userId: user.userId,
+      count: data.length,
+      data: data,
+    });
+
     return c.json(data);
   } catch (error) {
     console.error("Error in /anime/list:", error);
