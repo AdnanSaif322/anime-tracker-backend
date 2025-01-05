@@ -65,6 +65,7 @@ export async function login(c: Context) {
       {
         userId: user.id,
         email: user.email,
+        // Add any other necessary data
       },
       process.env.JWT_SECRET!,
       { expiresIn: "24h" }

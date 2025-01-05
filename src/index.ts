@@ -44,6 +44,12 @@ app.use("*", async (c, next) => {
   }
 });
 
+// Add this before routes
+app.use("*", async (c, next) => {
+  console.log(`${c.req.method} ${c.req.url}`);
+  await next();
+});
+
 // Routes
 app.route("/auth", auth);
 app.route("/anime", anime);
