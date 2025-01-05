@@ -137,78 +137,15 @@ export class SupabaseService {
   }
 
   async signIn(email: string, password: string) {
-    try {
-      console.log("Attempting login for email:", email);
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    const response = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-      if (error) {
-        console.error("Auth error:", error);
-        throw new Error("Invalid email or password");
-      }
-
-      if (!data.user) {
-        throw new Error("No user data returned");
-      }
-
-      // Get user profile data
-      const { data: profileData, error: profileError } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", data.user.id)
-        .single();
-
-      // If profile doesn't exist, create one
-      if (profileError?.code === "PGRST116") {
-        const { data: newProfile, error: createError } = await adminClient
-          .from("users")
-          .insert({
-            id: data.user.id,
-            email: data.user.email!,
-            username: data.user.email!.split("@")[0],
-            role: "user",
-          })
-          .select()
-          .single();
-
-        if (createError) {
-          console.error("Failed to create profile:", createError);
-          throw new Error("Failed to create user profile");
-        }
-
-        return {
-          ...data,
-          user: {
-            ...data.user,
-            user_metadata: {
-              ...data.user.user_metadata,
-              ...newProfile,
-            },
-          },
-        };
-      }
-
-      if (profileError) {
-        console.error("Profile fetch error:", profileError);
-        throw new Error("Failed to fetch user profile");
-      }
-
-      return {
-        ...data,
-        user: {
-          ...data.user,
-          user_metadata: {
-            ...data.user.user_metadata,
-            ...profileData,
-          },
-        },
-      };
-    } catch (error) {
-      console.error("SupabaseService signIn error:", error);
-      throw error;
-    }
+    return {
+      data: response.data?.user || null,
+      error: response.error,
+    };
   }
 
   // Anime methods

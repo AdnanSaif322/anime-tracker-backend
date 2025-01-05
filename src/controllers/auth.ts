@@ -55,23 +55,22 @@ export async function login(c: Context) {
       return c.json({ error: "Email and password are required" }, 400);
     }
 
-    const { data, error } = await supabaseService.signIn(email, password);
-    console.log("Supabase response:", { data, error });
+    const { data: user, error } = await supabaseService.signIn(email, password);
 
-    if (error || !data.user) {
+    if (error || !user) {
       return c.json({ error: "Invalid credentials" }, 401);
     }
 
     const token = jwt.sign(
       {
-        userId: data.user.id,
-        email: data.user.email,
+        userId: user.id,
+        email: user.email,
       },
       process.env.JWT_SECRET!,
       { expiresIn: "24h" }
     );
 
-    return c.json({ token, user: data.user });
+    return c.json({ token, user });
   } catch (error) {
     console.error("Login error:", error);
     return c.json({ error: "Authentication failed" }, 401);
