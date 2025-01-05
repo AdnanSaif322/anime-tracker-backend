@@ -49,65 +49,32 @@ export async function register(c: Context) {
 export async function login(c: Context) {
   try {
     const { email, password } = await c.req.json();
+    console.log("Login attempt for:", email);
 
-    // Validate input
     if (!email || !password) {
-      return c.json(
-        {
-          error: "Email and password are required",
-        },
-        400
-      );
+      return c.json({ error: "Email and password are required" }, 400);
     }
 
-    try {
-      const data = await supabaseService.signIn(email, password);
+    const { data, error } = await supabaseService.signIn(email, password);
+    console.log("Supabase response:", { data, error });
 
-      if (!data.user) {
-        return c.json(
-          {
-            error: "Authentication failed",
-          },
-          401
-        );
-      }
-
-      const token = jwt.sign(
-        {
-          userId: data.user.id,
-          email: data.user.email,
-          role: data.user.user_metadata.role || "user",
-        },
-        process.env.JWT_SECRET!,
-        { expiresIn: "24h" }
-      );
-
-      return c.json({
-        token,
-        user: {
-          id: data.user.id,
-          email: data.user.email,
-          role: data.user.user_metadata.role || "user",
-        },
-      });
-    } catch (error: any) {
-      console.error("Login error:", error);
-      return c.json(
-        {
-          error: error.message || "Invalid credentials",
-          details: process.env.NODE_ENV === "development" ? error : undefined,
-        },
-        401
-      );
+    if (error || !data.user) {
+      return c.json({ error: "Invalid credentials" }, 401);
     }
-  } catch (error) {
-    console.error("Request error:", error);
-    return c.json(
+
+    const token = jwt.sign(
       {
-        error: "Invalid request format",
+        userId: data.user.id,
+        email: data.user.email,
       },
-      400
+      process.env.JWT_SECRET!,
+      { expiresIn: "24h" }
     );
+
+    return c.json({ token, user: data.user });
+  } catch (error) {
+    console.error("Login error:", error);
+    return c.json({ error: "Authentication failed" }, 401);
   }
 }
 
