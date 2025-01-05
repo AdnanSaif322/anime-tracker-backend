@@ -65,10 +65,13 @@ export async function login(c: Context) {
       {
         userId: user.id,
         email: user.email,
-        // Add any other necessary data
+        type: "access_token",
       },
       process.env.JWT_SECRET!,
-      { expiresIn: "24h" }
+      {
+        expiresIn: "24h",
+        algorithm: "HS256",
+      }
     );
 
     return c.json({ token, user });

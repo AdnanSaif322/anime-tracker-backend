@@ -25,11 +25,15 @@ export async function authMiddleware(
   }
 
   const token = authHeader.split(" ")[1];
-  console.log("Token received:", token.substring(0, 20) + "...");
-
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
-    console.log("Decoded token:", decoded);
+    console.log("Token details:", {
+      userId: decoded.userId,
+      email: decoded.email,
+      origin: c.req.header("Origin") || "no-origin",
+      path: c.req.path,
+      method: c.req.method,
+    });
     c.set("user", decoded);
     await next();
   } catch (error) {
