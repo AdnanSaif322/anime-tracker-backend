@@ -86,7 +86,7 @@ app.onError((err, c) => {
 });
 
 // Start server
-const port = Number(process.env.PORT) || 3001;
+const port = process.env.PORT ? parseInt(process.env.PORT) : 3001;
 console.log(`Server is running on port ${port}`);
 
 serve({
