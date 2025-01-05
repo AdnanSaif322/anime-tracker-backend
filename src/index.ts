@@ -19,8 +19,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://anime-tracker-adnansaif322.vercel.app", // Your Vercel domain
-      "https://your-backend-domain.com", // Your backend domain
+      "https://anime-tracker-adnansaif322.vercel.app",
     ],
     credentials: true,
   })
