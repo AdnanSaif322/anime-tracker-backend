@@ -82,13 +82,14 @@ export async function login(c: Context<CustomContext>) {
       sameSite: "none",
       path: "/",
       maxAge: 60 * 60 * 24,
-      domain: ".onrender.com",
+      domain: "anime-tracker-backend.onrender.com",
       partitioned: true,
     });
 
     console.log("Setting cookie:", {
       token: token.substring(0, 20) + "...",
       headers: c.res.headers,
+      domain: "anime-tracker-backend.onrender.com",
     });
 
     return c.json({
