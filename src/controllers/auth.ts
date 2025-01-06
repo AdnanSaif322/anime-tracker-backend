@@ -80,9 +80,15 @@ export async function login(c: Context<CustomContext>) {
       httpOnly: true,
       secure: true,
       sameSite: "none",
-      partitioned: true,
-      maxAge: 60 * 60 * 24,
       path: "/",
+      maxAge: 60 * 60 * 24,
+      domain: ".onrender.com",
+      partitioned: true,
+    });
+
+    console.log("Setting cookie:", {
+      token: token.substring(0, 20) + "...",
+      headers: c.res.headers,
     });
 
     return c.json({
