@@ -79,20 +79,16 @@ export async function login(c: Context<CustomContext>) {
     console.log("Request origin:", c.req.header("Origin"));
     console.log("Request protocol:", c.req.header("X-Forwarded-Proto"));
 
-    setCookie(c, "auth_token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      path: "/",
-      maxAge: 60 * 60 * 24,
-    });
-
     c.res.headers.append(
       "Set-Cookie",
       `auth_token=${token}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=${
         60 * 60 * 24
-      }`
+      }; Partitioned`
     );
+
+    c.res.headers.append("X-Content-Type-Options", "nosniff");
+    c.res.headers.append("X-Frame-Options", "DENY");
+    c.res.headers.append("X-XSS-Protection", "1; mode=block");
 
     const headers = Object.fromEntries(c.res.headers.entries());
     console.log("Response headers:", {
