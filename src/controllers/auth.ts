@@ -83,7 +83,7 @@ export async function login(c: Context<CustomContext>) {
       "Set-Cookie",
       `auth_token=${token}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=${
         60 * 60 * 24
-      }; Partitioned`
+      }; Domain=anime-tracker-backend.onrender.com`
     );
 
     c.res.headers.append("X-Content-Type-Options", "nosniff");
