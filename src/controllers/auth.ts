@@ -84,20 +84,8 @@ export async function login(c: Context<CustomContext>) {
       `auth_token=${token}; HttpOnly; Secure; SameSite=None; Path=/`
     );
 
-    c.res.headers.append("Access-Control-Allow-Credentials", "true");
-    c.res.headers.append(
-      "Access-Control-Allow-Origin",
-      "https://anime-tracker-frontend.vercel.app"
-    );
-    c.res.headers.append(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization"
-    );
-
     console.log("Final response headers:", {
       cookie: c.res.headers.get("Set-Cookie"),
-      cors: c.res.headers.get("Access-Control-Allow-Origin"),
-      credentials: c.res.headers.get("Access-Control-Allow-Credentials"),
     });
 
     return c.json({

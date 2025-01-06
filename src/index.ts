@@ -31,16 +31,12 @@ app.use("*", async (c: Context<CustomContext>, next) => {
 app.use(
   "*",
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://anime-tracker-adnansaif322.vercel.app",
-      "https://anime-tracker-frontend.vercel.app",
-    ],
+    origin: "https://anime-tracker-frontend.vercel.app",
     credentials: true,
     allowMethods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
     exposeHeaders: ["Set-Cookie", "Authorization"],
-    maxAge: 86400, // 24 hours in seconds
+    maxAge: 86400,
   })
 );
 
