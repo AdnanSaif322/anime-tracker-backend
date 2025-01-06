@@ -85,9 +85,14 @@ export async function login(c: Context<CustomContext>) {
       sameSite: "none",
       path: "/",
       maxAge: 60 * 60 * 24,
-      domain: "anime-tracker-backend.onrender.com",
-      partitioned: true,
     });
+
+    c.res.headers.append(
+      "Set-Cookie",
+      `auth_token=${token}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=${
+        60 * 60 * 24
+      }`
+    );
 
     const headers = Object.fromEntries(c.res.headers.entries());
     console.log("Response headers:", {
