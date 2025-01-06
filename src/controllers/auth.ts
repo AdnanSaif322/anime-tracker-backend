@@ -76,6 +76,9 @@ export async function login(c: Context<CustomContext>) {
       { expiresIn: "24h" }
     );
 
+    console.log("Request origin:", c.req.header("Origin"));
+    console.log("Request protocol:", c.req.header("X-Forwarded-Proto"));
+
     setCookie(c, "auth_token", token, {
       httpOnly: true,
       secure: true,
@@ -86,10 +89,11 @@ export async function login(c: Context<CustomContext>) {
       partitioned: true,
     });
 
-    console.log("Setting cookie:", {
-      token: token.substring(0, 20) + "...",
-      headers: c.res.headers,
-      domain: "anime-tracker-backend.onrender.com",
+    const headers = Object.fromEntries(c.res.headers.entries());
+    console.log("Response headers:", {
+      headers,
+      setCookieHeader: c.res.headers.get("Set-Cookie"),
+      origin: c.req.header("Origin"),
     });
 
     return c.json({
