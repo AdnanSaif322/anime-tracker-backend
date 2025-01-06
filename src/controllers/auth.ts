@@ -81,24 +81,28 @@ export async function login(c: Context<CustomContext>) {
 
     c.res.headers.append(
       "Set-Cookie",
-      `auth_token=${token}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=${
-        60 * 60 * 24
-      }; Domain=anime-tracker-backend.onrender.com`
+      `auth_token=${token}; HttpOnly; Secure; SameSite=None; Path=/`
     );
 
-    c.res.headers.append("X-Content-Type-Options", "nosniff");
-    c.res.headers.append("X-Frame-Options", "DENY");
-    c.res.headers.append("X-XSS-Protection", "1; mode=block");
+    c.res.headers.append("Access-Control-Allow-Credentials", "true");
+    c.res.headers.append(
+      "Access-Control-Allow-Origin",
+      "https://anime-tracker-frontend.vercel.app"
+    );
+    c.res.headers.append(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization"
+    );
 
-    const headers = Object.fromEntries(c.res.headers.entries());
-    console.log("Response headers:", {
-      headers,
-      setCookieHeader: c.res.headers.get("Set-Cookie"),
-      origin: c.req.header("Origin"),
+    console.log("Final response headers:", {
+      cookie: c.res.headers.get("Set-Cookie"),
+      cors: c.res.headers.get("Access-Control-Allow-Origin"),
+      credentials: c.res.headers.get("Access-Control-Allow-Credentials"),
     });
 
     return c.json({
       message: "Login successful",
+      token: token,
       user: {
         email: user.email,
         id: user.id,
