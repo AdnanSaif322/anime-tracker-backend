@@ -324,6 +324,31 @@ export class SupabaseService {
       .eq("id", userId)
       .single();
   }
+
+  async createDefaultUser() {
+    try {
+      const email = "demo@animetracker.com";
+      const password = "demo123!";
+      const username = "Demo User";
+
+      // Check if user already exists
+      const { data: existingUser } = await supabase
+        .from("users")
+        .select("*")
+        .eq("email", email)
+        .single();
+
+      if (!existingUser) {
+        await this.signUp(email, password, username);
+        console.log("Default user created successfully");
+      }
+
+      return { email, password };
+    } catch (error) {
+      console.error("Error creating default user:", error);
+      throw error;
+    }
+  }
 }
 
 export const supabaseService = new SupabaseService();
