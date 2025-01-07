@@ -346,14 +346,14 @@ export class SupabaseService {
       // If we get here, account doesn't exist, so create it
       console.log("Creating new demo account...");
 
-      // Create auth user
-      const { data: newUser, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { username },
-        },
-      });
+      // Create auth user with admin key to bypass email confirmation
+      const { data: newUser, error: signUpError } =
+        await supabase.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true, // Automatically confirm the email
+          user_metadata: { username },
+        });
 
       if (signUpError) throw signUpError;
 
