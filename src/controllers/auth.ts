@@ -61,7 +61,7 @@ export async function login(c: Context) {
 
     c.res.headers.append(
       "Set-Cookie",
-      `auth_token=${token}; HttpOnly; Secure; SameSite=None; Path=/; Domain=.vercel.app`
+      `auth_token=${token}; HttpOnly; Secure; SameSite=None; Path=/`
     );
 
     return c.json({
