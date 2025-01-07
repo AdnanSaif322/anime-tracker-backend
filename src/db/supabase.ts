@@ -331,21 +331,48 @@ export class SupabaseService {
       const password = "demo123!";
       const username = "Demo User";
 
-      // Check if user already exists
-      const { data: existingUser } = await supabase
-        .from("users")
-        .select("*")
-        .eq("email", email)
-        .single();
+      // Try to sign in with demo credentials
+      const { data: authUser } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-      if (!existingUser) {
-        await this.signUp(email, password, username);
-        console.log("Default user created successfully");
+      // If sign in successful, account exists
+      if (authUser.user) {
+        console.log("Demo account already exists");
+        return { email, password };
       }
+
+      // If we get here, account doesn't exist, so create it
+      console.log("Creating new demo account...");
+
+      // Create auth user
+      const { data: newUser, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { username },
+        },
+      });
+
+      if (signUpError) throw signUpError;
+
+      // Create user profile
+      const { error: profileError } = await supabase.from("users").insert([
+        {
+          id: newUser.user!.id,
+          email,
+          username,
+          role: "user",
+        },
+      ]);
+
+      if (profileError) throw profileError;
+      console.log("Demo user created successfully");
 
       return { email, password };
     } catch (error) {
-      console.error("Error creating default user:", error);
+      console.error("Error creating demo user:", error);
       throw error;
     }
   }

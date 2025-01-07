@@ -6,9 +6,23 @@ import { config } from "dotenv";
 import auth from "./routes/auth";
 import anime from "./routes/anime";
 import { isAppError } from "./utils/errors";
+import supabaseService from "./services/supabaseService";
 
 // Load environment variables
 config();
+
+// Add after config();
+async function initializeApp() {
+  try {
+    await supabaseService.createDefaultUser();
+    console.log("Demo account initialized successfully");
+  } catch (error) {
+    console.error("Failed to initialize demo account:", error);
+  }
+}
+
+// Call it before starting the server
+initializeApp();
 
 // Remove cookie middleware and custom context
 const app = new Hono();
