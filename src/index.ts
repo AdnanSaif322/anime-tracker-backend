@@ -32,7 +32,10 @@ app.use("*", logger());
 app.use(
   "*",
   cors({
-    origin: "https://anime-tracker-frontend.vercel.app",
+    origin: [
+      "https://anime-tracker-frontend.vercel.app", // Production frontend
+      "http://localhost:5173", // Local development
+    ],
     credentials: true,
     allowMethods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
@@ -40,6 +43,13 @@ app.use(
     maxAge: 86400,
   })
 );
+
+// Add this middleware to handle cookies properly
+app.use("*", async (c, next) => {
+  // Add SameSite=None and Secure for cross-origin cookies
+  c.res.headers.append("Set-Cookie", "SameSite=None; Secure");
+  await next();
+});
 
 // Increase timeout middleware
 app.use("*", async (c, next) => {
