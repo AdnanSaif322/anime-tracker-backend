@@ -6,7 +6,7 @@ import { config } from "dotenv";
 import auth from "./routes/auth";
 import anime from "./routes/anime";
 import { isAppError } from "./utils/errors";
-import supabaseService from "./services/supabaseService";
+import { supabaseService } from "./db/supabase";
 
 // Load environment variables
 config();
