@@ -61,6 +61,17 @@ const adminClient = createClient(
   }
 );
 
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  }
+);
+
 export class SupabaseService {
   // Auth methods
   async signUp(email: string, password: string, username: string) {
@@ -337,28 +348,26 @@ export class SupabaseService {
         password,
       });
 
-      // If sign in successful, account exists
       if (authUser.user) {
         console.log("Demo account already exists");
         return { email, password };
       }
 
-      // If we get here, account doesn't exist, so create it
       console.log("Creating new demo account...");
 
-      // Create auth user with admin key to bypass email confirmation
+      // Use supabaseAdmin instead of supabase
       const { data: newUser, error: signUpError } =
-        await supabase.auth.admin.createUser({
+        await supabaseAdmin.auth.admin.createUser({
           email,
           password,
-          email_confirm: true, // Automatically confirm the email
+          email_confirm: true,
           user_metadata: { username },
         });
 
       if (signUpError) throw signUpError;
 
-      // Create user profile
-      const { error: profileError } = await supabase.from("users").insert([
+      // Create user profile using supabaseAdmin
+      const { error: profileError } = await supabaseAdmin.from("users").insert([
         {
           id: newUser.user!.id,
           email,
