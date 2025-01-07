@@ -1,6 +1,5 @@
 import { Context, Next } from "hono";
 import jwt from "jsonwebtoken";
-import type { CustomContext } from "../types/context";
 import { getCookie } from "hono/cookie";
 
 interface DecodedToken {
@@ -8,7 +7,7 @@ interface DecodedToken {
   email: string;
 }
 
-export async function authMiddleware(c: Context<CustomContext>, next: Next) {
+export async function authMiddleware(c: Context, next: Next) {
   const token = getCookie(c, "auth_token");
 
   if (!token) {

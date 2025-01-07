@@ -316,6 +316,14 @@ export class SupabaseService {
     if (error) throw error;
     return data;
   }
+
+  async getUserProfile(userId: string) {
+    return await supabase
+      .from("users")
+      .select("username, email, role")
+      .eq("id", userId)
+      .single();
+  }
 }
 
 export const supabaseService = new SupabaseService();
